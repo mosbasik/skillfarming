@@ -37,6 +37,32 @@ var iskOptions = {
     maximumFractionDigits: 2,
 }
 
+function updateCalculatedFields() {
+    var brokerRate = brokerPercents[localStorage["broker-relations-skill-level"]];
+    var transactionRate = accountingPercents[localStorage["accounting-skill-level"]];
+    var brokerFee;
+    var transactionFee;
+
+    // plex price with tax
+    var plexBuy = parseFloat(localStorage.plexBuy);
+    brokerFee = plexBuy * brokerRate;
+    localStorage.setItem("plexBuyTax", plexBuy + brokerFee);
+    $("#plex-buy-tax").val(parseFloat(localStorage.plexBuyTax).toLocaleString("en-US", iskOptions));
+
+    // extractor price with tax
+    var extractorBuy = parseFloat(localStorage.extractorBuy);
+    brokerFee = extractorBuy * brokerRate;
+    localStorage.setItem("extractorBuyTax", extractorBuy + brokerFee);
+    $("#extractor-buy-tax").val(parseFloat(localStorage.extractorBuyTax).toLocaleString("en-US", iskOptions));
+
+    // injector price with tax
+    var injectorSell = parseFloat(localStorage.injectorSell);
+    brokerFee = injectorSell * brokerRate;
+    transactionFee = injectorSell * transactionRate
+    localStorage.setItem("injectorSellTax", injectorSell + brokerFee + transactionFee);
+    $("#injector-sell-tax").val(parseFloat(localStorage.injectorSellTax).toLocaleString("en-US", iskOptions));
+};
+
 var request = new XMLHttpRequest();
 request.onreadystatechange = function() {
     if (request.readyState == 4 && request.status == 200) {
@@ -53,15 +79,6 @@ request.onreadystatechange = function() {
             ));
         $("#plex-buy").val(parseFloat(localStorage.plexBuy).toLocaleString("en-US", iskOptions));
 
-        // plex price with tax
-        var brokerRate = brokerPercents[localStorage["broker-relations-skill-level"]];
-        var plexBuy = parseFloat(localStorage.plexBuy);
-        var brokerFee = plexBuy * brokerRate;
-        localStorage.setItem("plexBuyTax", plexBuy + brokerFee);
-        $("#plex-buy-tax").val(parseFloat(localStorage.plexBuyTax).toLocaleString("en-US", iskOptions));
-
-
-
         // save extractor price
         localStorage.setItem("extractorBuy",
             parseFloat(
@@ -73,14 +90,6 @@ request.onreadystatechange = function() {
                        .nodeValue
             ));
         $("#extractor-buy").val(parseFloat(localStorage.extractorBuy).toLocaleString("en-US", iskOptions));
-
-        // extractor price with tax
-        var brokerRate = brokerPercents[localStorage["broker-relations-skill-level"]];
-        var extractorBuy = parseFloat(localStorage.extractorBuy);
-        var brokerFee = extractorBuy * brokerRate;
-        localStorage.setItem("extractorBuyTax", extractorBuy + brokerFee);
-        $("#extractor-buy-tax").val(parseFloat(localStorage.extractorBuyTax).toLocaleString("en-US", iskOptions));
-
 
         // save injector price
         localStorage.setItem("injectorSell",
@@ -94,16 +103,7 @@ request.onreadystatechange = function() {
             ));
         $("#injector-sell").val(parseFloat(localStorage.injectorSell).toLocaleString("en-US", iskOptions));
 
-        // injector price with tax
-        var brokerRate = brokerPercents[localStorage["broker-relations-skill-level"]];
-        var transactionRate = accountingPercents[localStorage["accounting-skill-level"]];
-        var injectorSell = parseFloat(localStorage.injectorSell);
-        var brokerFee = injectorSell * brokerRate;
-        var transactionFee = injectorSell * transactionRate
-        localStorage.setItem("injectorSellTax", injectorSell + brokerFee + transactionFee);
-        $("#injector-sell-tax").val(parseFloat(localStorage.injectorSellTax).toLocaleString("en-US", iskOptions));
-
-
+        updateCalculatedFields();
     }
 };
 request.open("GET",
@@ -117,7 +117,7 @@ request.send();
 
 
 
-// monitor user inputs and if they change, save them to localStorage
+// listen to user inputs and if they change, save them to localStorage
 
 $("#sp-per-hour").on("input", function() {
     localStorage.setItem("sp-per-hour", $(this).val())
@@ -129,6 +129,12 @@ $("#accounting-skill-level").on("change", function() {
 
 $("#broker-relations-skill-level").on("change", function() {
     localStorage.setItem("broker-relations-skill-level", $(this).val())
+});
+
+
+// listens to changes on user inputs and if they change, update calc'ed values
+$(".user-input").on('keyup change', function() {
+    updateCalculatedFields();
 });
 
 
