@@ -34,9 +34,13 @@
 
               <a href="https://eve-central.com/">EVE-Central</a>
 
-              and determines whether or not skill farming is profitable and
-              to what degree.  It defaults to the most common settings, but
-              you can tweak them to fit your own situation.
+              and determines whether or not skill farming is profitable and to
+              what degree.  The setup values are set at the values most people
+              are likely to have to start with, but can be tweaked to fit your
+              characters.  Calculations currently assume you're buying from buy
+              orders, selling to sell orders, and are working in Jita.  I'm
+              aware that Perimeter is a high volume SP market; support for
+              citadels might come soon.
 
             </p>
 
@@ -155,6 +159,38 @@
                           </div>
                         </div>
 
+
+                        <!-- injectors / month -->
+                        <div class="col-sm-6">
+                          <div class="form-group">
+                            <label for="injectors-per-month">Injectors / Month</label>
+                            <input id="injectors-per-month" class="form-control" value="Loading..." disabled>
+                          </div>
+                        </div>
+
+                        <!-- monthly extractor cost -->
+                        <div class="col-sm-6">
+                          <div class="form-group">
+                            <label for="monthly-extractor-cost">Monthly Extractor Cost</label>
+                            <input id="monthly-extractor-cost" class="form-control" value="Loading..." disabled>
+                          </div>
+                        </div>
+
+                        <!-- monthly injector revenue -->
+                        <div class="col-sm-6">
+                          <div class="form-group">
+                            <label for="monthly-injector-revenue">Monthly Injector Revenue</label>
+                            <input id="monthly-injector-revenue" class="form-control" value="Loading..." disabled>
+                          </div>
+                        </div>
+
+                        <!-- monthly net profit -->
+                        <div class="col-sm-6">
+                          <div class="form-group">
+                            <label for="monthly-net-profit">Monthly Net Profit</label>
+                            <input id="monthly-net-profit" class="form-control" value="Loading..." disabled>
+                          </div>
+                        </div>
 
                       </div>
                     </form>

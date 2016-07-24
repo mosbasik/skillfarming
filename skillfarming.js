@@ -58,9 +58,29 @@ function updateCalculatedFields() {
     // injector price with tax
     var injectorSell = parseFloat(localStorage.injectorSell);
     brokerFee = injectorSell * brokerRate;
-    transactionFee = injectorSell * transactionRate
-    localStorage.setItem("injectorSellTax", injectorSell + brokerFee + transactionFee);
+    transactionFee = injectorSell * transactionRate;
+    localStorage.setItem("injectorSellTax", injectorSell - (brokerFee + transactionFee));
     $("#injector-sell-tax").val(parseFloat(localStorage.injectorSellTax).toLocaleString("en-US", iskOptions));
+
+    // injectors per month
+    var spPerHour = parseFloat(localStorage.getItem("sp-per-hour"));
+    var spPerMonth = spPerHour * 24 * 30;
+    var injectorsPerMonth = spPerMonth / 500000;
+    $("#injectors-per-month").val(injectorsPerMonth);
+    console.log(injectorsPerMonth);
+
+    // monthly extractor cost
+    var monthlyExtractorCost = parseFloat(localStorage.extractorBuyTax) * injectorsPerMonth;
+    $("#monthly-extractor-cost").val(monthlyExtractorCost.toLocaleString("en-US", iskOptions));
+
+    // monthly injector revenue
+    var monthlyInjectorRevenue = parseFloat(localStorage.injectorSellTax) * injectorsPerMonth;
+    $("#monthly-injector-revenue").val(monthlyInjectorRevenue.toLocaleString("en-US", iskOptions));
+
+    // monthly net profit
+    var monthlyNetProfit = monthlyInjectorRevenue - (monthlyExtractorCost + parseFloat(localStorage.plexBuyTax));
+    $("#monthly-net-profit").val(monthlyNetProfit.toLocaleString("en-US", iskOptions));
+
 };
 
 var request = new XMLHttpRequest();
