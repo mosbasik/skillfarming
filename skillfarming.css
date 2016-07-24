@@ -28,7 +28,7 @@ h2 {
 
 .banner {
     /*background: url(banner.jpg) no-repeat center center fixed; */
-    background: url(banner.jpg) no-repeat center center;
+    /*background: url(banner.jpg) no-repeat center center;*/
     height: 320px;
     width: 100%;
     position: fixed;/

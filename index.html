@@ -1,7 +1,9 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>We Buy Homes</title>
+    <title>Skill Farming</title>
+
+    <link rel="shortcut icon" href="favicon.ico" />
 
     <!-- <link rel="stylesheet" type="text/css" href="static/css/bootstrap.min.css"> -->
     <link rel="stylesheet" type="text/css" href="bootstrap/css/bootstrap.min.css">
@@ -21,188 +23,151 @@
 
       <div id="content" class="container">
         <h1 class="text-center">IS SKILL FARMING STILL PROFITABLE?</h1>
+
+        <!-- main content panel -->
         <div class="panel panel-default">
           <div class="panel-body">
+
+            <p>
+
+              This page pulls market data from
+
+              <a href="https://eve-central.com/">EVE-Central</a>
+
+              and determines whether or not skill farming is profitable and
+              to what degree.  It defaults to the most common settings, but
+              you can tweak them to fit your own situation.
+
+            </p>
+
             <div class="row">
-              <div class="col-lg-6 col-md-8 col-sm-12">
-
-                <h2>Purpose of this page:</h2>
-                <p>
-
-                This page pulls market data from
-
-                <a href="https://eve-central.com/">EVE-Central</a>
-
-                and determines whether or not skill farming is profitable and
-                to what degree.  It defaults to the most common settings, but
-                you can tweak them to fit your own situation.
-
-                <h2>PLEX buy price in Jita</h2>
-                <p>
-                
-                <span id="plex-buy">Loading...</span>
-
-                </p>
-
-                <!-- input table column -->
-                <div class="col-lg-12">
-                  <div class="row">
-                    
-                    <div class="panel panel-primary">
-                      <div class="panel-heading">Put in some information about your character:</div>
-                      <div class="panel-body">
-                        <form action="">
-                          <div class="row">
-                            
-                            
-                            <div class="col-lg-6 col-md-12">
-                              <div class="form-group">
-                                <label for="sp-per-hour" >SP/Hour</label>
-                                <input id="sp-per-hour" class="form-control" value=2700>
-                              </div>
-                            </div>
-
-                            <div class="col-lg-6 col-md-12">
-                              <div class="form-group">
-                                <label for="accounting-skill-level">Accounting Skill Level</label>
-                                <select class="form-control empty">
-                                  <option value="1">1</option>
-                                  <option value="2">2</option>
-                                  <option value="3">3</option>
-                                  <option value="4" selected>4</option>
-                                  <option value="5">5</option>
-                                </select>
-                              </div>
-                            </div>
-
-                            <div class="col-lg-6 col-md-12">
-                              <div class="form-group">
-                                <label for="broker-relations-skill-level">Broker Relations Skill Level</label>
-                                <select class="form-control empty">
-                                  <option value="1">1</option>
-                                  <option value="2">2</option>
-                                  <option value="3">3</option>
-                                  <option value="4" selected>4</option>
-                                  <option value="5">5</option>
-                                </select>
-                              </div>
-                            </div>
 
 
+              <!-- input form panel -->
+              <div class="col-sm-6">
+
+                <div class="panel panel-primary">
+                  <div class="panel-heading">Define your setup:</div>
+                  <div class="panel-body">
+                    <form action="">
+                      <div class="row">
+
+                        <!-- sp per hour input -->
+                        <div class="col-lg-6 col-md-12">
+                          <div class="form-group">
+                            <label for="sp-per-hour">SP/Hour</label>
+                            <input id="sp-per-hour" class="form-control" value=2700>
                           </div>
-                        </form>
+                        </div>
+
+                        <!-- accounting skill level input -->
+                        <div class="col-lg-6 col-md-12">
+                          <div class="form-group">
+                            <label for="accounting-skill-level">Accounting Skill Level</label>
+                            <select id="accounting-skill-level" class="form-control empty">
+                              <option value="0">0</option>
+                              <option value="1">1</option>
+                              <option value="2">2</option>
+                              <option value="3">3</option>
+                              <option value="4" selected>4</option>
+                              <option value="5">5</option>
+                            </select>
+                          </div>
+                        </div>
+
+                        <!-- broker relations skill level input -->
+                        <div class="col-lg-6 col-md-12">
+                          <div class="form-group">
+                            <label for="broker-relations-skill-level">Broker Relations Skill Level</label>
+                            <select id="broker-relations-skill-level" class="form-control empty">
+                              <option value="0">0</option>
+                              <option value="1">1</option>
+                              <option value="2">2</option>
+                              <option value="3">3</option>
+                              <option value="4" selected>4</option>
+                              <option value="5">5</option>
+                            </select>
+                          </div>
+                        </div>
+
                       </div>
-                    </div>
+                    </form>
                   </div>
                 </div>
 
-              </div>
+              </div> <!-- end of input form panel -->
 
-              <div class="col-lg-6 col-md-4 col-sm-12">
-                
 
-                <div class="row">
+              <!-- value panel -->
+              <div class="col-sm-6">
 
-                  <!-- form column -->
-                  <div class="col-lg-12 col-md-12 col-sm-6">
+                <div class="panel panel-primary">
+                  <div class="panel-heading">Some market values:</div>
+                  <div class="panel-body">
+                    <form action="">
+                      <div class="row">
 
-                    <!-- form panel -->
-                    <div class="panel panel-primary">
-                      <div class="panel-heading">Tell us about your property:</div>
-                      <div class="panel-body">
-
-                        <!-- seller form -->
-                        <form>
-
-                          <div class="row"> <!-- seller information control row -->
-
-                            <div class="col-lg-6 col-md-12">
-                              <div class="form-group">
-                                <label for='seller-firstname' class="sr-only">First Name</label>
-                                <input id='seller-firstname' class="form-control" placeholder="First Name">
-                              </div>
-                            </div>
-
-                            <div class="col-lg-6 col-md-12">
-                              <div class="form-group">
-                                <label for='seller-lastname' class="sr-only">Last Name</label>
-                                <input id='seller-lastname' class="form-control" placeholder="Last Name">
-                              </div>
-                            </div>
-
-                            <div class="col-lg-6 col-md-12">
-                              <div class="form-group">
-                                <label for='seller-email' class="sr-only">Email Address</label>
-                                <input id='seller-email' class="form-control" placeholder="Email Address">
-                              </div>
-                            </div>
-
-                            <div class="col-lg-6 col-md-12">
-                              <div class="form-group">
-                                <label for='seller-phone' class="sr-only">Phone Number</label>
-                                <input id='seller-phone' class="form-control" placeholder="Phone Number">
-                              </div>
-                            </div>
-
-                            <div class="col-lg-6 col-md-12">
-                              <div class="form-group">
-                                <label for='seller-address' class="sr-only">Property Address</label>
-                                <input id='seller-address' class="form-control" placeholder="Property Address">
-                              </div>
-                            </div>
-
-                            <div class="col-lg-6 col-md-12">
-                              <div class="form-group">
-                                <label for='seller-zip' class="sr-only">Zip Code</label>
-                                <select class="form-control empty">
-                                  <option selected disabled>Zip Code</option>
-                                  <option value="33520">33520</option>
-                                  <option value="33534">33534</option>
-                                  <option value="33569">33569</option>
-                                  <option value="33572">33572</option>
-                                  <option value="33578">33578</option>
-                                  <option value="33579">33579</option>
-                                  <option value="33606">33606</option>
-                                  <option value="33609">33609</option>
-                                  <option value="33611">33611</option>
-                                  <option value="33616">33616</option>
-                                  <option value="33619">33619</option>
-                                  <option value="33629">33629</option>
-                                </select>
-                              </div>
-                            </div>
-
-                            <div class="col-lg-12 col-md-12">
-                              <div class="form-group">
-                                <label for='seller-reason' class="sr-only">Reason for Sale</label>
-                                <textarea id='seller-reason' class="form-control" placeholder="(Optional) Why are you selling this property?"></textarea>
-                              </div>
-                            </div>
-
-                            <div class="col-lg-12 col-md-12">
-                              <div class="form-group">
-                                <label for='seller-comments' class="sr-only">Additional Comments</label>
-                                <textarea id='seller-comments' class="form-control" placeholder="(Optional) Additional Comments"></textarea>
-                              </div>
-                            </div>
-
-                          </div> <!-- end of seller information control row -->
-
-                          <div class="row"> <!-- form submission row -->
-                            <div class="col-lg-12 col-md-12">
-                              <button type="submit" class="btn btn-primary pull-right">Submit</button>
-                            </div> <!-- end of form submission row -->
+                        <!-- plex buy -->
+                        <div class="col-sm-6">
+                          <div class="form-group">
+                            <label for="plex-buy">PLEX Buy</label>
+                            <input id="plex-buy" class="form-control" value="Loading..." disabled>
                           </div>
-                        </form>
+                        </div>
+
+                        <!-- plex buy taxed -->
+                        <div class="col-sm-6">
+                          <div class="form-group">
+                            <label for="plex-buy-tax">PLEX Buy w/Tax</label>
+                            <input id="plex-buy-tax" class="form-control" value="Loading..." disabled>
+                          </div>
+                        </div>
+
+                        <!-- extractor buy -->
+                        <div class="col-sm-6">
+                          <div class="form-group">
+                            <label for="extractor-buy">Extractor Buy</label>
+                            <input id="extractor-buy" class="form-control" value="Loading..." disabled>
+                          </div>
+                        </div>
+
+                        <!-- extractor buy taxed -->
+                        <div class="col-sm-6">
+                          <div class="form-group">
+                            <label for="extractor-buy-tax">Extractor Buy w/Tax</label>
+                            <input id="extractor-buy-tax" class="form-control" value="Loading..." disabled>
+                          </div>
+                        </div>
+
+                        <!-- injector sell -->
+                        <div class="col-sm-6">
+                          <div class="form-group">
+                            <label for="injector-sell">Injector Sell</label>
+                            <input id="injector-sell" class="form-control" value="Loading..." disabled>
+                          </div>
+                        </div>
+
+                        <!-- injector sell taxed -->
+                        <div class="col-sm-6">
+                          <div class="form-group">
+                            <label for="injector-sell-tax">Injector Sell w/Tax</label>
+                            <input id="injector-sell-tax" class="form-control" value="Loading..." disabled>
+                          </div>
+                        </div>
+
 
                       </div>
-                    </div>
+                    </form>
                   </div>
                 </div>
-              </div>
+
+
+              </div> <!-- end of alue panel -->
+
+
             </div>
           </div>
-        </div>
+        </div> <!-- end of main content panel -->
       </div>
 
       <footer id="footer" class="container">

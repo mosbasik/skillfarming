@@ -1,67 +1,151 @@
 // basic IDs that are useful
 // systems: http://eve-marketdata.com/developers/solarsystems.php
-var typeIdPlex = 29668;
-var systemIdPerimeter = 30000144;
-var systemIdJita = 30000142;
-
-items = [
-    29668,  // plex
-    40519,  // extractor
-    40520,  // injector
-];
-
-systems = {
-    "jita": 30000142,
-    "perimeter": 30000144
+items = {
+    plex: 29668,
+    extractor: 40519,
+    injector: 40520,
 };
 
-/**
- * Given an array of elements, prepends each of them with a parameter name and
- * returns a concatenated string separated by &s.
- *
- * Example:
- * var elements = [12, 34, 56];
- * var paramName = "foo";
- * returns "foo=12&foo=34&foo=56&"
- */
-// function makeArgString(paramName, elements) {
-//     for (i in elements) {
-//         elements[i] = paramName + "=" + elements[i] + "&";
-//     }
-//     return elements.join("");
-// };
+systems = {
+    jita: 30000142,
+    perimeter: 30000144,
+};
+
+accountingPercents = [
+    0.02,
+    0.018,
+    0.016,
+    0.014,
+    0.012,
+    0.01,
+]
+
+brokerPercents = [
+    0.03,
+    0.027,
+    0.024,
+    0.021,
+    0.018,
+    0.015,
+]
 
 
 
-// function marketstat(typeid, usesystem) {
-
-//     var marketstatString = "http://api.eve-central.com/api/marketstat?";
-//     var muhstring = marketstatString + "?typeid=" + typeid + "&usesystem=" + usesystem;
-//     var request = new XMLHttpRequest();
-    
-//     console.log(muhstring);
-//     request.open("GET", muhstring, true);
-    
-//     console.log(request.responseXML)
-//     return request.responseXML;
-// };
+var iskOptions = {
+    style: "decimal",
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+}
 
 var request = new XMLHttpRequest();
 request.onreadystatechange = function() {
     if (request.readyState == 4 && request.status == 200) {
         console.log(request.responseXML);
 
-        var plexBuy = request
-                .responseXML
-                .getElementsByTagName("buy")[0]
-                .getElementsByTagName("max")[0]
-                .childNodes[0]
-                .nodeValue;
+        // save plex price
+        localStorage.setItem("plexBuy",
+            parseFloat(
+                request.responseXML
+                       .getElementsByTagName("buy")[0]
+                       .getElementsByTagName("max")[0]
+                       .childNodes[0]
+                       .nodeValue
+            ));
+        $("#plex-buy").val(parseFloat(localStorage.plexBuy).toLocaleString("en-US", iskOptions));
 
-        document.getElementById("plex-buy").innerHTML = plexBuy;
+        // plex price with tax
+        var brokerRate = brokerPercents[localStorage["broker-relations-skill-level"]];
+        var plexBuy = parseFloat(localStorage.plexBuy);
+        var brokerFee = plexBuy * brokerRate;
+        localStorage.setItem("plexBuyTax", plexBuy + brokerFee);
+        $("#plex-buy-tax").val(parseFloat(localStorage.plexBuyTax).toLocaleString("en-US", iskOptions));
 
-        console.log(plexBuy);
+
+
+        // save extractor price
+        localStorage.setItem("extractorBuy",
+            parseFloat(
+                request.responseXML
+                       .getElementById("40519")
+                       .getElementsByTagName("buy")[0]
+                       .getElementsByTagName("max")[0]
+                       .childNodes[0]
+                       .nodeValue
+            ));
+        $("#extractor-buy").val(parseFloat(localStorage.extractorBuy).toLocaleString("en-US", iskOptions));
+
+        // extractor price with tax
+        var brokerRate = brokerPercents[localStorage["broker-relations-skill-level"]];
+        var extractorBuy = parseFloat(localStorage.extractorBuy);
+        var brokerFee = extractorBuy * brokerRate;
+        localStorage.setItem("extractorBuyTax", extractorBuy + brokerFee);
+        $("#extractor-buy-tax").val(parseFloat(localStorage.extractorBuyTax).toLocaleString("en-US", iskOptions));
+
+
+        // save injector price
+        localStorage.setItem("injectorSell",
+            parseFloat(
+                request.responseXML
+                       .getElementById("40520")
+                       .getElementsByTagName("sell")[0]
+                       .getElementsByTagName("min")[0]
+                       .childNodes[0]
+                       .nodeValue
+            ));
+        $("#injector-sell").val(parseFloat(localStorage.injectorSell).toLocaleString("en-US", iskOptions));
+
+        // injector price with tax
+        var brokerRate = brokerPercents[localStorage["broker-relations-skill-level"]];
+        var transactionRate = accountingPercents[localStorage["accounting-skill-level"]];
+        var injectorSell = parseFloat(localStorage.injectorSell);
+        var brokerFee = injectorSell * brokerRate;
+        var transactionFee = injectorSell * transactionRate
+        localStorage.setItem("injectorSellTax", injectorSell + brokerFee + transactionFee);
+        $("#injector-sell-tax").val(parseFloat(localStorage.injectorSellTax).toLocaleString("en-US", iskOptions));
+
+
     }
 };
-request.open("GET", "http://api.eve-central.com/api/marketstat?typeid=29668&usesystem=30000142");
+request.open("GET",
+    "http://api.eve-central.com/api/marketstat" + "?" +
+    "typeid="    + items["plex"]      + "&" +
+    "typeid="    + items["extractor"] + "&" +
+    "typeid="    + items["injector"]  + "&" +
+    "usesystem=" + systems["jita"]
+);
 request.send();
+
+
+
+// monitor user inputs and if they change, save them to localStorage
+
+$("#sp-per-hour").on("input", function() {
+    localStorage.setItem("sp-per-hour", $(this).val())
+});
+
+$("#accounting-skill-level").on("change", function() {
+    localStorage.setItem("accounting-skill-level", $(this).val())
+});
+
+$("#broker-relations-skill-level").on("change", function() {
+    localStorage.setItem("broker-relations-skill-level", $(this).val())
+});
+
+
+// check if localStorage has any saved user-input values - if it does,
+// substitute them for the default form values
+
+if (localStorage.getItem("sp-per-hour") === null) {
+} else {
+    $("#sp-per-hour").val(localStorage.getItem("sp-per-hour"));
+}
+
+if (localStorage.getItem("accounting-skill-level") === null) {
+} else {
+    $("#accounting-skill-level").val(localStorage.getItem("accounting-skill-level"));
+}
+
+if (localStorage.getItem("broker-relations-skill-level") === null) {
+} else {
+    $("#broker-relations-skill-level").val(localStorage.getItem("broker-relations-skill-level"));
+}
