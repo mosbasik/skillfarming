@@ -158,20 +158,24 @@ $(".user-input").on('keyup change', function() {
 });
 
 
-// check if localStorage has any saved user-input values - if it does,
-// substitute them for the default form values
+// If localStorage has no saved input values, grab the page defaults and store
+// them in localStorage.  If localStorage DOES have saved input values, replace
+// the defaults on the page with the saved values.
 
 if (localStorage.getItem("sp-per-hour") === null) {
+    localStorage.setItem("sp-per-hour", $("#sp-per-hour").val());
 } else {
     $("#sp-per-hour").val(localStorage.getItem("sp-per-hour"));
 }
 
 if (localStorage.getItem("accounting-skill-level") === null) {
+    localStorage.setItem("accounting-skill-level", $("#accounting-skill-level").val());
 } else {
     $("#accounting-skill-level").val(localStorage.getItem("accounting-skill-level"));
 }
 
 if (localStorage.getItem("broker-relations-skill-level") === null) {
+    localStorage.setItem("broker-relations-skill-level", $("#broker-relations-skill-level").val());
 } else {
     $("#broker-relations-skill-level").val(localStorage.getItem("broker-relations-skill-level"));
 }
