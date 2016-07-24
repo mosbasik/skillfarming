@@ -127,7 +127,7 @@ request.onreadystatechange = function() {
     }
 };
 request.open("GET",
-    "http://api.eve-central.com/api/marketstat" + "?" +
+    "https://api.eve-central.com/api/marketstat" + "?" +
     "typeid="    + items["plex"]      + "&" +
     "typeid="    + items["extractor"] + "&" +
     "typeid="    + items["injector"]  + "&" +
