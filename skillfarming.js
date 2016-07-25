@@ -158,24 +158,82 @@ $(".user-input").on('keyup change', function() {
 });
 
 
-// If localStorage has no saved input values, grab the page defaults and store
-// them in localStorage.  If localStorage DOES have saved input values, replace
-// the defaults on the page with the saved values.
 
-if (localStorage.getItem("sp-per-hour") === null) {
-    localStorage.setItem("sp-per-hour", $("#sp-per-hour").val());
-} else {
-    $("#sp-per-hour").val(localStorage.getItem("sp-per-hour"));
+
+
+//-----------------------------------------------
+
+
+
+
+
+// values from Eve that don't change
+var constants = {
+    itemIDs: {plex: 29668, extractor: 40519, injector: 40520,},
+    systemIDs: {jita: 30000142, perimeter: 30000144,},
+    accountingRate: [0.02, 0.018, 0.016, 0.014, 0.012, 0.01,],
+    brokerRate: [0.03, 0.027, 0.024, 0.021, 0.018, 0.015,],
+};
+
+// initialize the user inputs state to default values
+var userInputs = {
+    spPerHour: 2700,
+    accountingSkillLevel: 4,
+    brokerRelationsSkillLevel: 4,
+    plex: "buy",
+    extractor: "buy",
+    injector: "sell",
 }
 
-if (localStorage.getItem("accounting-skill-level") === null) {
-    localStorage.setItem("accounting-skill-level", $("#accounting-skill-level").val());
-} else {
-    $("#accounting-skill-level").val(localStorage.getItem("accounting-skill-level"));
+// read/initialize local storage for all user input keys
+for (key in userInputs) {
+    // if the key IS NOT in local storage
+    if (localStorage.getItem(key) === null) {
+        // store the default value into local storage
+        localStorage[key] = userInputs[key];
+    // if the key IS in local storage
+    } else {
+        // use the local storage value in the state instead of the default
+        userInputs[key] = localStorage[key];
+    }
 }
 
-if (localStorage.getItem("broker-relations-skill-level") === null) {
-    localStorage.setItem("broker-relations-skill-level", $("#broker-relations-skill-level").val());
-} else {
-    $("#broker-relations-skill-level").val(localStorage.getItem("broker-relations-skill-level"));
-}
+new Vue({
+    el: "#app",
+    data: {
+        state: userInputs,
+        plex: {buy: "DEADBEEF", sell: "DEADBEEF",},
+        extractor: {buy: "DEADBEEF", sell: "DEADBEEF",},
+        injector: {buy: "DEADBEEF", sell: "DEADBEEF",},
+    },
+    computed: {
+
+    },
+    methods: {
+        tax: function(capital, orderType) {
+            if (orderType === "buy") {
+                return capital * constants.brokerRate[this.state.brokerRelationsSkillLevel];
+            } else if (orderType === "sell") {
+                return capital * constants.brokerRate[this.state.brokerRelationsSkillLevel] +
+                    capital * constants.accountingRate[this.state.accountingSkillLevel];
+            } else {
+                console.log("Unexpected orderType");
+            }
+        },
+        swapItemOrderTypeState: function(itemName) {
+            if (this.state[itemName] === "buy") {
+                this.state[itemName] = "sell";
+                localStorage["state-" + itemName] = "sell";
+            } else if (this.state[itemName] === "sell") {
+                this.state[itemName] = "buy";
+                localStorage["state-" + itemName] = "buy";
+            } else {
+                console.log("Unexpected ItemOrderTypeState");
+            }
+        },
+        setUserInput: function(key, value) {
+            this.state[key] = value;
+            localStorage[key] = value;
+        },
+    },
+});
