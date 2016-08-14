@@ -1,220 +1,111 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <title>Skill Farming</title>
+    <head>
 
-    <link rel="shortcut icon" href="favicon.ico" />
+        <title>Skill Farming</title>
 
-    <!-- <link rel="stylesheet" type="text/css" href="static/css/bootstrap.min.css"> -->
-    <link rel="stylesheet" type="text/css" href="bootstrap/css/bootstrap.min.css">
-    <link rel="stylesheet" type="text/css" href="bootflat/css/bootflat.min.css">
-    <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Ubuntu:400,700|Josefin+Sans:700">
+        <!-- <link rel="stylesheet" type="text/css" href="static/css/bootstrap.min.css"> -->
+        <link rel="stylesheet" type="text/css" href="bootstrap/css/bootstrap.min.css">
+        <link rel="stylesheet" type="text/css" href="bootflat/css/bootflat.min.css">
+        <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Ubuntu:400,700|Josefin+Sans:700">
 
-    <!-- <link rel="stylesheet" type="text/css" href="object-fit-0.4.1/dist/polyfill.object-fit.css"> -->
-    <link rel="stylesheet" type="text/css" href="skillfarming.css">
+        <!-- <link rel="stylesheet" type="text/css" href="object-fit-0.4.1/dist/polyfill.object-fit.css"> -->
+        <link rel="stylesheet" type="text/css" href="skillfarming.css">
 
-  </head>
+    </head>
 
-  <body>
+    <body id="skill-farming-app">
 
-    <div id="body-contents"> <!-- tearaway footer body wrapper -->
+        <h1>Skill Farming</h1>
 
-      <div class="banner"></div>
+        <h2>Inputs</h2>
+        
+        <label for="sp-per-hour">SP per hour:</label>
+        <input id="sp-per-hour" type="number" v-model="input.spPerHour" value="2700">
+        <br>
 
-      <div id="content" class="container">
-        <h1 class="text-center">IS SKILL FARMING STILL PROFITABLE?</h1>
+        <label for="accounting-level">Accounting Level:</label>
+        <input id="accounting-level" type="number" v-model="input.accountingLevel" value="5">
+        <br>
 
-        <!-- main content panel -->
-        <div class="panel panel-default">
-          <div class="panel-body">
+        <label for="broker-relations-level">Broker Relations Level:</label>
+        <input id="broker-relations-level" type="number" v-model="input.brokerRelationsLevel" value="5">
+        <br>
 
-            <p>
+        <label for="number-characters">Number of characters:</label>
+        <input id="number-characters" type="number" v-model="input.numberCharacters" value="1">
+        <br>
 
-              This page pulls market data from
+        <h2>Outputs</h2>
 
-              <a href="https://eve-central.com/">EVE-Central</a>
-
-              and determines whether or not skill farming is profitable and to
-              what degree.  The setup values are set at the values most people
-              are likely to have to start with, but can be tweaked to fit your
-              characters.  Calculations currently assume you're buying from buy
-              orders, selling to sell orders, and are working in Jita.  I'm
-              aware that Perimeter is a high volume SP market; support for
-              citadels might come soon.
-
-            </p>
-
-            <div class="row">
-
-
-              <!-- input form panel -->
-              <div class="col-sm-6">
-
-                <div class="panel panel-primary">
-                  <div class="panel-heading">Define your setup:</div>
-                  <div class="panel-body">
-                    <form action="">
-                      <div class="row">
-
-                        <!-- sp per hour input -->
-                        <div class="col-lg-6 col-md-12">
-                          <div class="form-group">
-                            <label for="sp-per-hour">SP/Hour</label>
-                            <input id="sp-per-hour" class="form-control user-input" value=2700>
-                          </div>
-                        </div>
-
-                        <!-- accounting skill level input -->
-                        <div class="col-lg-6 col-md-12">
-                          <div class="form-group">
-                            <label for="accounting-skill-level">Accounting Skill Level</label>
-                            <select id="accounting-skill-level" class="form-control user-input empty">
-                              <option value="0">0</option>
-                              <option value="1">1</option>
-                              <option value="2">2</option>
-                              <option value="3">3</option>
-                              <option value="4" selected>4</option>
-                              <option value="5">5</option>
-                            </select>
-                          </div>
-                        </div>
-
-                        <!-- broker relations skill level input -->
-                        <div class="col-lg-6 col-md-12">
-                          <div class="form-group">
-                            <label for="broker-relations-skill-level">Broker Relations Skill Level</label>
-                            <select id="broker-relations-skill-level" class="form-control user-input empty">
-                              <option value="0">0</option>
-                              <option value="1">1</option>
-                              <option value="2">2</option>
-                              <option value="3">3</option>
-                              <option value="4" selected>4</option>
-                              <option value="5">5</option>
-                            </select>
-                          </div>
-                        </div>
-
-                      </div>
-                    </form>
-                  </div>
-                </div>
-
-              </div> <!-- end of input form panel -->
-
-
-              <!-- value panel -->
-              <div class="col-sm-6">
-
-                <div class="panel panel-primary">
-                  <div class="panel-heading">Some market values:</div>
-                  <div class="panel-body">
-                    <form action="">
-                      <div class="row">
-
-                        <!-- plex buy -->
-                        <div class="col-sm-6">
-                          <div class="form-group">
-                            <label for="plex-buy">PLEX Buy</label>
-                            <input id="plex-buy" class="form-control" value="Loading..." disabled>
-                          </div>
-                        </div>
-
-                        <!-- plex buy taxed -->
-                        <div class="col-sm-6">
-                          <div class="form-group">
-                            <label for="plex-buy-tax">PLEX Buy w/Tax</label>
-                            <input id="plex-buy-tax" class="form-control" value="Loading..." disabled>
-                          </div>
-                        </div>
-
-                        <!-- extractor buy -->
-                        <div class="col-sm-6">
-                          <div class="form-group">
-                            <label for="extractor-buy">Extractor Buy</label>
-                            <input id="extractor-buy" class="form-control" value="Loading..." disabled>
-                          </div>
-                        </div>
-
-                        <!-- extractor buy taxed -->
-                        <div class="col-sm-6">
-                          <div class="form-group">
-                            <label for="extractor-buy-tax">Extractor Buy w/Tax</label>
-                            <input id="extractor-buy-tax" class="form-control" value="Loading..." disabled>
-                          </div>
-                        </div>
-
-                        <!-- injector sell -->
-                        <div class="col-sm-6">
-                          <div class="form-group">
-                            <label for="injector-sell">Injector Sell</label>
-                            <input id="injector-sell" class="form-control" value="Loading..." disabled>
-                          </div>
-                        </div>
-
-                        <!-- injector sell taxed -->
-                        <div class="col-sm-6">
-                          <div class="form-group">
-                            <label for="injector-sell-tax">Injector Sell w/Tax</label>
-                            <input id="injector-sell-tax" class="form-control" value="Loading..." disabled>
-                          </div>
-                        </div>
+        <h3>Monthly Profit</h3>
+        <h4>{{ totalRevenue - totalCost | currency '' 2 }} ISK</h4>
+    
+        <h3>Monthly Cost</h3>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th></th>
+                    <th class="isk-header">Base Price</th>
+                    <th>Monthly Multiplier</th>
+                    <th class="isk-header">Taxed Price</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <th>Plex Buy</th>
+                    <td class="isk">{{ prices.plexBuy | currency '' 2 }}</td>
+                    <td>{{ input.numberCharacters }}</td>
+                    <td class="isk">{{ taxedPlexBuy | currency '' 2 }}</td>
+                </tr>
+                <tr>
+                    <th>Extractor Buy</th>
+                    <td class="isk">{{ prices.extractorBuy | currency '' 2 }}</td>
+                    <td>{{ input.numberCharacters * extractorsPerMonth }}</td>
+                    <td class="isk">{{ taxedExtractorBuy | currency '' 2 }}</td>
+                </tr>
+            </tbody>
+            <tfoot>
+                <tr>
+                    <th></th>
+                    <th></th>
+                    <th></th>
+                    <th class="isk">{{ totalCost | currency '' 2}}</th>
+                </tr>
+            </tfoot>
+        </table>
+        
+        <h3>Monthly Revenue</h3>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th></th>
+                    <th class="isk-header">Base Price</th>
+                    <th>Monthly Multiplier</th>
+                    <th class="isk-header">Taxed Price</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <th>Injector Sell</th>
+                    <td class="isk">{{ input.numberCharacters * injectorsPerMonth * prices.injectorSell | currency '' 2 }}</td>
+                    <td>{{ input.numberCharacters * injectorsPerMonth }}</td>
+                    <td class="isk">{{ input.numberCharacters * injectorsPerMonth * taxedSellOrderPrice(prices.injectorSell) | currency '' 2 }}</td>
+                </tr>
+            </tbody>
+            <tfoot>
+                <th></th>
+                <th></th>
+                <th></th>
+                <th class="isk">{{ totalRevenue | currency '' 2 }}</th>   
+            </tfoot>
+        </table>
 
 
-                        <!-- injectors / month -->
-                        <div class="col-sm-6">
-                          <div class="form-group">
-                            <label for="injectors-per-month">Injectors / Month</label>
-                            <input id="injectors-per-month" class="form-control" value="Loading..." disabled>
-                          </div>
-                        </div>
+        <script type="text/javascript" src="bootstrap/js/jquery-1.11.3.min.js"></script>
+        <script type="text/javascript" src="bootstrap/js/bootstrap.min.js"></script>
+        <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/vue/1.0.26/vue.min.js"></script>
+        <script type="text/javascript" src="skillfarming.js"></script>
 
-                        <!-- monthly extractor cost -->
-                        <div class="col-sm-6">
-                          <div class="form-group">
-                            <label for="monthly-extractor-cost">Monthly Extractor Cost</label>
-                            <input id="monthly-extractor-cost" class="form-control" value="Loading..." disabled>
-                          </div>
-                        </div>
-
-                        <!-- monthly injector revenue -->
-                        <div class="col-sm-6">
-                          <div class="form-group">
-                            <label for="monthly-injector-revenue">Monthly Injector Revenue</label>
-                            <input id="monthly-injector-revenue" class="form-control" value="Loading..." disabled>
-                          </div>
-                        </div>
-
-                        <!-- monthly net profit -->
-                        <div class="col-sm-6">
-                          <div class="form-group">
-                            <label for="monthly-net-profit">Monthly Net Profit</label>
-                            <input id="monthly-net-profit" class="form-control" value="Loading..." disabled>
-                          </div>
-                        </div>
-
-                      </div>
-                    </form>
-                  </div>
-                </div>
-
-
-              </div> <!-- end of alue panel -->
-
-
-            </div>
-          </div>
-        </div> <!-- end of main content panel -->
-      </div>
-
-      <footer id="footer" class="container">
-        <a href="https://github.com/mosbasik/skillfarming">Github</a> | <a href="http://evewho.com/pilot/Mussah+Yacoub">EveWho</a>
-      </footer>
-    </div>
-
-    <script type="text/javascript" src="bootstrap/js/jquery-1.11.3.min.js"></script>
-    <script type="text/javascript" src="bootstrap/js/bootstrap.min.js"></script>
-    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/vue/1.0.26/vue.min.js"></script>
-    <script type="text/javascript" src="skillfarming.js"></script>
-
-  </body>
+    </body>
 </html>
