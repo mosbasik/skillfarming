@@ -10,6 +10,10 @@
 
         // app initial state
         data: {
+            defaults: {
+                spPerHour: 2700,
+                characterCount: 1,
+            },
             characterModels: [
                 // Structure of example characterModel:
                 // {
@@ -17,11 +21,9 @@
                 //     characterCount: 1,
                 // }
             ],
-            defaults: {
-                accountingLevel: 4,
-                brokerRelationsLevel: 4,
-                spPerHour: 2700,
-                characterCount: 1,
+            skillLevels: {
+                accounting: 4,
+                brokerRelations: 4,
             },
             prices: {
                 plexBuy: 1005001706.01,
@@ -44,18 +46,37 @@
          * The statements in this function are executed once, as soon as the Vue app is finished loading.
          */
         ready: function() {
+            // import any character data from local storage into the characterModels Array
             this.characterModels = this.localFetch('characterModels', []);
+
+            // if the characterModels Array is still empty, put a single default character in it
             if (!this.characterModels.length) {
                 this.addCharacterModel();
+            }
+
+            // attempt to get user's custom tax skill levels from local storage
+            var storeSkillLevels = this.localFetch('skillLevels', NaN);
+
+            // if custom levels were found, overwrite the default levels with the custom ones
+            if (storeSkillLevels) {
+                this.skillLevels = Object.assign({}, storeSkillLevels);
             }
         },
 
         // watchers (when any of these structures change, run their handler functions)
         watch: {
+
             characterModels: {
                 deep: true,
                 handler: function(val, oldVal) {
                     this.localStore('characterModels', val);
+                },
+            },
+
+            skillLevels: {
+                deep: true,
+                handler: function(val, oldVal) {
+                    this.localStore('skillLevels', val);
                 },
             },
         },
@@ -71,14 +92,14 @@
              * @returns {Float} Transaction fee rate based on level of Accounting
              */
             transactionRate: function() {
-                return this.skills.accounting.base - (parseInt(this.input.accountingLevel) * this.skills.accounting.change);
+                return this.skills.accounting.base - (parseInt(this.skillLevels.accounting) * this.skills.accounting.change);
             },
             
             /**
              * @returns {Float} Broker's fee rate based on level of Broker Relations
              */
             brokerRate: function() {
-                return this.skills.brokerRelations.base - (parseInt(this.input.brokerRelationsLevel) * this.skills.brokerRelations.change);
+                return this.skills.brokerRelations.base - (parseInt(this.skillLevels.brokerRelations) * this.skills.brokerRelations.change);
             },
 
             /**
