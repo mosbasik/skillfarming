@@ -11,7 +11,7 @@
         // app initial state
         data: {
             characterModels: [
-                // Layout of an example characterModel.  The key is the Unix timestamp of its creation.
+                // Structure of example characterModel:
                 // {
                 //     spPerHour: 2700,
                 //     characterCount: 1,
@@ -44,7 +44,20 @@
          * The statements in this function are executed once, as soon as the Vue app is finished loading.
          */
         ready: function() {
-            this.addCharacterModel();
+            this.characterModels = this.localFetch('characterModels', []);
+            if (!this.characterModels.length) {
+                this.addCharacterModel();
+            }
+        },
+
+        // watchers (when any of these structures change, run their handler functions)
+        watch: {
+            characterModels: {
+                deep: true,
+                handler: function(val, oldVal) {
+                    this.localStore('characterModels', val);
+                },
+            },
         },
 
         // computed properties
@@ -145,10 +158,26 @@
         methods: {
 
             /**
+             * @param {String} key Key of data to be stored in localStorage
+             * @param {Object} value Data to be stored in localStorage
+             */
+            localStore: function(key, value) {
+                localStorage.setItem(key, JSON.stringify(value));
+            },
+
+            /**
+             * @param {String} key Key of a value saved in localstorage
+             * @param defaultReturn Value that is returned if the key doesn't exist in localStorage
+             * @returns {Object} Contents of localStorage with that key
+             */
+            localFetch: function(key, defaultReturn) {
+                return JSON.parse(localStorage.getItem(key) || defaultReturn);
+            },
+
+            /**
              * Adds a new default character to the character Object.
              */
             addCharacterModel: function() {
-
                 // create a new character from the default settings
                 var newCharacterModel = {
                     spPerHour: this.defaults.spPerHour,
