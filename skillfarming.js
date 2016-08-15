@@ -10,11 +10,18 @@
 
         // app initial state
         data: {
-            input: {
-                spPerHour: 2700,
+            characterModels: [
+                // Layout of an example characterModel.  The key is the Unix timestamp of its creation.
+                // {
+                //     spPerHour: 2700,
+                //     characterCount: 1,
+                // }
+            ],
+            defaults: {
                 accountingLevel: 4,
                 brokerRelationsLevel: 4,
-                numberCharacters: 1,
+                spPerHour: 2700,
+                characterCount: 1,
             },
             prices: {
                 plexBuy: 1005001706.01,
@@ -23,38 +30,64 @@
             },
             skills: {
                 accounting: {
-                    base: .02,
-                    change: .002, // flat
+                    base: 0.02,
+                    change: 0.002, // flat
                 },
                 brokerRelations: {
-                    base: .03,
-                    change: .001, // flat
-                }
+                    base: 0.03,
+                    change: 0.001, // flat
+                },
             },
+        },
+
+        /**
+         * The statements in this function are executed once, as soon as the Vue app is finished loading.
+         */
+        ready: function() {
+            this.addCharacterModel();
         },
 
         // computed properties
         computed: {
 
+            characterModelsRepr: function() {
+                return JSON.stringify(this.characterModels);
+            },
+
             /**
              * @returns {Float} Transaction fee rate based on level of Accounting
              */
             transactionRate: function() {
-                return this.skills.accounting.base - (parseInt(this.input.accountingLevel) * this.skills.accounting.change)
+                return this.skills.accounting.base - (parseInt(this.input.accountingLevel) * this.skills.accounting.change);
             },
             
             /**
              * @returns {Float} Broker's fee rate based on level of Broker Relations
              */
             brokerRate: function() {
-                return this.skills.brokerRelations.base - (parseInt(this.input.brokerRelationsLevel) * this.skills.brokerRelations.change)
+                return this.skills.brokerRelations.base - (parseInt(this.input.brokerRelationsLevel) * this.skills.brokerRelations.change);
             },
 
             /**
              * @returns {Float} Number of skillpoints trained per month based on sp/hr
              */
             spPerMonth: function() {
-                return parseFloat(this.input.spPerHour) * 24 * 30;
+                var totalSpPerHour = 0;
+                for (var characterModel of this.characterModels) {
+                    totalSpPerHour += (parseInt(characterModel.spPerHour) * parseInt(characterModel.characterCount));
+                }
+                return totalSpPerHour * 24 * 30;
+            },
+
+            /**
+             * @returns {Integer} Number of plex consumed by farm characters per month
+             */
+            numberCharacters: function() {
+                var count = 0;
+                for (var characterModel of this.characterModels) {
+                    count += parseInt(characterModel.characterCount);
+                }
+                return count;
             },
 
             /**
@@ -72,24 +105,24 @@
             },
 
             /**
-             * @returns {Float} Monthly cost of PLEXes based on taxes and number of characters
+             * @returns {Float} Monthly cost of PLEXes based on taxes and number of characterModels
              */
             taxedPlexBuy: function() {
-                return this.taxedBuyOrderPrice(this.prices.plexBuy) * parseInt(this.input.numberCharacters);
+                return this.taxedBuyOrderPrice(this.prices.plexBuy) * this.numberCharacters;
             },
 
             /**
-             * @returns {Float} Monthly cost of extractors based on taxes, number of characters, and sp/month
+             * @returns {Float} Monthly cost of extractors based on taxes, number of characterModels, and sp/month
              */
             taxedExtractorBuy: function() {
-                return this.taxedBuyOrderPrice(this.prices.extractorBuy) * parseInt(this.input.numberCharacters) * this.extractorsPerMonth;
+                return this.taxedBuyOrderPrice(this.prices.extractorBuy) * this.extractorsPerMonth;
             },
 
             /**
-             * @returns {Float} Monthly revenue of injectors based on taxes, number of characters, and sp/month
+             * @returns {Float} Monthly revenue of injectors based on taxes, number of characterModels, and sp/month
              */
             taxedInjectorSell: function() {
-                return this.taxedSellOrderPrice(this.prices.injectorSell) * parseInt(this.input.numberCharacters) * this.injectorsPerMonth;
+                return this.taxedSellOrderPrice(this.prices.injectorSell) * this.injectorsPerMonth;
             },
 
             /**
@@ -112,6 +145,28 @@
         methods: {
 
             /**
+             * Adds a new default character to the character Object.
+             */
+            addCharacterModel: function() {
+
+                // create a new character from the default settings
+                var newCharacterModel = {
+                    spPerHour: this.defaults.spPerHour,
+                    characterCount: this.defaults.characterCount,
+                };
+
+                // add the new characterModel to the Array of characterModels
+                this.characterModels.push(newCharacterModel);
+            },
+
+            /**
+             * Removes specified character from the character Object.
+             */
+            removeCharacterModel: function(characterModel) {
+                this.characterModels.$remove(characterModel);
+            },
+
+            /**
              * @param {Float} principal Raw price of a buy order
              * @returns {Float} Sum of the buy order's raw price and broker fee
              */
@@ -124,7 +179,7 @@
              * @returns {Float} Sum of the sell order's raw price, broker fee and sales tax
              */
             taxedSellOrderPrice: function(principal) {
-                return principal - (principal * this.brokerRate) + (principal * this.transactionRate);
+                return principal - (principal * this.brokerRate) - (principal * this.transactionRate);
             },
 
         },
