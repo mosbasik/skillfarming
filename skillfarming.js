@@ -26,9 +26,11 @@
                 brokerRelations: 4,
             },
             prices: {
-                plexBuy: 1005001706.01,
-                extractorBuy: 230000101.01,
-                injectorSell: 618996449.00,
+                lastEveCentralPollTime: 0,
+                pollingInterval: 1800000,  // minimum milliseconds that must elapse between polls (30 min)
+                plexBuy: 0,
+                extractorBuy: 0,
+                injectorSell: 0,
             },
             skills: {
                 accounting: {
@@ -40,26 +42,52 @@
                     change: 0.001, // flat
                 },
             },
+            id: {
+                item: {
+                    plex: 29668,
+                    extractor: 40519,
+                    injector: 40520,
+                },
+                system: {
+                    jita: 30000142,
+                    perimeter: 30000144,
+                },
+            },
         },
 
         /**
          * The statements in this function are executed once, as soon as the Vue app is finished loading.
          */
         ready: function() {
-            // import any character data from local storage into the characterModels Array
-            this.characterModels = this.localFetch('characterModels', []);
 
+            // attempt to get cached prices from local storage
+            var cachedPrices = this.localFetch('prices');
+            // if cached prices were found
+            if (cachedPrices) {
+                // overwrite default prices with cached ones
+                this.prices = Object.assign({}, cachedPrices);
+                // if cached prices are not fresh, get updated prices from Eve Central
+                if (Date.now() > (this.prices.lastEveCentralPollTime + this.prices.pollingInterval)) {
+                    this.getPrices();
+                }
+            }
+            // else no cached prices were found, so get updated prices from Eve Central
+            else {
+                this.getPrices();
+            }
+
+            // import any character data from local storage into the characterModels Array
+            this.characterModels = this.localFetch('characterModels') || [];
             // if the characterModels Array is still empty, put a single default character in it
-            if (!this.characterModels.length) {
+            if (!(this.characterModels.length)) {
                 this.addCharacterModel();
             }
 
             // attempt to get user's custom tax skill levels from local storage
-            var storeSkillLevels = this.localFetch('skillLevels', NaN);
-
+            var storedSkillLevels = this.localFetch('skillLevels');
             // if custom levels were found, overwrite the default levels with the custom ones
-            if (storeSkillLevels) {
-                this.skillLevels = Object.assign({}, storeSkillLevels);
+            if (storedSkillLevels) {
+                this.skillLevels = Object.assign({}, storedSkillLevels);
             }
         },
 
@@ -79,6 +107,13 @@
                     this.localStore('skillLevels', val);
                 },
             },
+
+            prices: {
+                deep: true,
+                handler: function(val, oldVal) {
+                    this.localStore('prices', val);
+                }
+            }
         },
 
         // computed properties
@@ -187,12 +222,18 @@
             },
 
             /**
-             * @param {String} key Key of a value saved in localstorage
-             * @param defaultReturn Value that is returned if the key doesn't exist in localStorage
-             * @returns {Object} Contents of localStorage with that key
+             * @param {String} key Key of a value saved in localStorage
+             * @returns {Object} Contents of localStorage with specified key, parsed into JSON
              */
-            localFetch: function(key, defaultReturn) {
-                return JSON.parse(localStorage.getItem(key) || defaultReturn);
+            localFetch: function(key) {
+                return JSON.parse(localStorage.getItem(key));
+            },
+
+            /**
+             * Clears the localStorage
+             */
+            localClear: function() {
+                localStorage.clear();
             },
 
             /**
@@ -214,6 +255,55 @@
              */
             removeCharacterModel: function(characterModel) {
                 this.characterModels.$remove(characterModel);
+            },
+
+            /**
+             * Polls Eve Central for updated plex, extractor and injector prices
+             */
+            getPrices: function() {
+
+                var url = `https://api.eve-central.com/api/marketstat?` +
+                            `typeid=${    this.id.item.plex      }&` +
+                            `typeid=${    this.id.item.extractor }&` +
+                            `typeid=${    this.id.item.injector  }&` +
+                            `usesystem=${ this.id.system.jita    }`;
+
+                this.$http.get(url).then((response) => {
+                    // success
+                    // console.log('successful eve central call');
+
+                    // set up a parser to extract data from the returned string-formatted XML
+                    var parser = new DOMParser();
+                    var doc = parser.parseFromString(response.text(), 'application/xml');
+
+                    // extract the plex price
+                    this.prices.plexBuy = parseFloat(doc.getElementById(this.id.item.plex)
+                                                        .getElementsByTagName('buy')[0]
+                                                        .getElementsByTagName('max')[0]
+                                                        .childNodes[0]
+                                                        .nodeValue);
+
+                    // extract the skill extractor price
+                    this.prices.extractorBuy = parseFloat(doc.getElementById(this.id.item.extractor)
+                                                             .getElementsByTagName('buy')[0]
+                                                             .getElementsByTagName('max')[0]
+                                                             .childNodes[0]
+                                                             .nodeValue);
+
+                    // extract the skill injector price
+                    this.prices.injectorSell = parseFloat(doc.getElementById(this.id.item.injector)
+                                                            .getElementsByTagName('sell')[0]
+                                                            .getElementsByTagName('min')[0]
+                                                            .childNodes[0]
+                                                            .nodeValue);
+
+                    // update the polling timestamp
+                    this.prices.lastEveCentralPollTime = Date.now();
+                }, (response) => {
+                    // failure
+                    // console.log('failed eve central call');
+                });
+
             },
 
             /**
