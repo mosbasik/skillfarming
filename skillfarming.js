@@ -30,6 +30,7 @@
                 pollingInterval: 1800000,  // minimum milliseconds that must elapse between polls (30 min)
                 plexBuy: 0,
                 extractorBuy: 0,
+                injectorBuy: 0,
                 injectorSell: 0,
             },
             skills: {
@@ -138,14 +139,21 @@
             },
 
             /**
-             * @returns {Float} Number of skillpoints trained per month based on sp/hr
+             * @returns {Float} Number of skillpoints trained per hour based on sp/hr
              */
-            spPerMonth: function() {
+            spPerHour: function() {
                 var totalSpPerHour = 0;
                 for (var characterModel of this.characterModels) {
                     totalSpPerHour += (parseInt(characterModel.spPerHour) * parseInt(characterModel.characterCount));
                 }
-                return totalSpPerHour * 24 * 30;
+                return totalSpPerHour;
+            },
+
+            /**
+             * @returns {Float} Number of skillpoints trained per month based on sp/hr
+             */
+            spPerMonth: function() {
+                return this.spPerHour * 24 * 30;
             },
 
             /**
@@ -206,6 +214,28 @@
              */
             totalRevenue: function() {
                 return this.taxedInjectorSell;
+            },
+
+            /**
+             * returns {Float} Cost of injectors needed to start all character models from scratch
+             */
+            startCostInjectTotal: function() {
+                var total = 0;
+                for (var characterModel of this.characterModels) {
+                    total += this.startCostInject(characterModel);
+                }
+                return total;
+            },
+
+            /**
+             * returns {Float} Cost of plex needed to start all character models from scratch given their sp/hr
+             */
+            startCostSubTotal: function() {
+                var total = 0;
+                for (var characterModel of this.characterModels) {
+                    total += this.startCostSub(characterModel);
+                }
+                return total;
             },
 
         },
@@ -290,7 +320,14 @@
                                                              .childNodes[0]
                                                              .nodeValue);
 
-                    // extract the skill injector price
+                    // extract the skill injector price (buy)
+                    this.prices.injectorBuy = parseFloat(doc.getElementById(this.id.item.injector)
+                                                            .getElementsByTagName('buy')[0]
+                                                            .getElementsByTagName('max')[0]
+                                                            .childNodes[0]
+                                                            .nodeValue);
+
+                    // extract the skill injector price (sell)
                     this.prices.injectorSell = parseFloat(doc.getElementById(this.id.item.injector)
                                                             .getElementsByTagName('sell')[0]
                                                             .getElementsByTagName('min')[0]
@@ -320,6 +357,32 @@
              */
             taxedSellOrderPrice: function(principal) {
                 return principal - (principal * this.brokerRate) - (principal * this.transactionRate);
+            },
+
+            /**
+             * @param {Object} characterModel Representation of a character model
+             * returns {Float} Cost of injectors needed to start this character model from scratch
+             */
+            startCostInject: function(characterModel) {
+                return this.prices.injectorBuy * 11 * characterModel.characterCount;
+            },
+
+            /**
+             * @param {Object} characterModel Representation of a character model
+             * returns {Float} Cost of plex needed to start this character model from scratch given its sp/hr
+             */
+            startCostSub: function(characterModel) {
+                return this.prices.plexBuy * (this.startTimeSub(characterModel) / 30) * characterModel.characterCount;
+            },
+
+            /**
+             * @param {Object} characterModel Representation of a character model
+             * returns {Float} Days needed to start this character model from scratch given its sp/hr
+             */
+            startTimeSub: function(characterModel) {
+                var spPerDay = characterModel.spPerHour * 24;
+                var daysNeeded = 5500000 / spPerDay;
+                return daysNeeded;
             },
 
         },
