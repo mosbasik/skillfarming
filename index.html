@@ -19,55 +19,40 @@
     <h1>Skill Farming</h1>
 
     <div class="row">
-
-      <div class="col-lg-3">
-
-          <div class="panel panel-info">
-            <div class="panel-heading">Tax Settings</div>
-            <div class="panel-body">
-              <div class="form-group">
-                <label for="accounting-level">Accounting Level:</label>
-                <input id="accounting-level" type="number" class="form-control" v-model="skillLevels.accounting">
-              </div>
-
-              <div class="form-group">
-                <label for="broker-relations-level">Broker Relations Level:</label>
-                <input id="broker-relations-level" type="number" class="form-control" v-model="skillLevels.brokerRelations">
-              </div>
-            </div>
-          </div>
-
+      <div class="col-lg-6">
+        <h2>Monthly Profit:</h2>
       </div>
-
-      <span v-for="characterModel of characterModels">
-        <div class="col-lg-3">
-          <div class="panel panel-primary">
-            <div class="panel-heading">
-              <button class="btn btn-danger btn-xs pull-right" @click="removeCharacterModel(characterModel)">x</button>
-              Character Model {{ $index + 1 }}
-            </div>
-            <div class="panel-body">
-              <div class="form-group">
-                <label for="sp-per-hour-{{ $index }}">SP per Hour:<label>
-                <input id="sp-per-hour-{{ $index }}" type="number" class="form-control" v-model="characterModels[$index].spPerHour">
-              </div>
-
-              <div class="form-group">
-                <label for="copies-{{ $index }}">Number of Characters:</label>
-                <input id="copies-{{ $index }}" type="number" class="form-control" v-model="characterModels[$index].characterCount">
-              </div>
-            </div>
-          </div>
-        </div>
-      </span>
-
-      <div class="col-lg-3">
-        <button class="btn btn-primary" @click="addCharacterModel">Add Character Model</button>
+      <div class="col-lg-6">
+        <h2><span class="pull-right">{{ totalRevenue - totalCost | currency '' 2 }}</span></h2>
       </div>
     </div>
 
+    <h2>Character Models</h2>
 
-    <h2>Monthly Profit: <span class="pull-right">{{ totalRevenue - totalCost | currency '' 2 }} ISK</span></h2>
+    <table class="table">
+      <thead>
+        <tr>
+          <th></th>
+          <th>SP/Hour</th>
+          <th># Characters</th>
+          <th class="text-center">Remove</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr v-for="characterModel of characterModels">
+          <th>Character Model {{ $index + 1 }}</th>
+          <td><input type="number" class="form-control" v-model="characterModels[$index].spPerHour"></td>
+          <td><input type="number" class="form-control" v-model="characterModels[$index].characterCount"></td>
+          <td><div class="text-center"><button class="btn btn-danger btn-sm" @click="removeCharacterModel(characterModel)">x</button></div></td>
+        </tr>
+      </tbody>
+      <tfoot>
+        <td><button class="btn btn-default" @click="addCharacterModel">Add New Character Model</button></td>
+        <td></td>
+        <td></td>
+        <td></td>
+      </tfoot>
+    </table>
 
     <h2>Monthly Cost</h2>
     <table class="table">
