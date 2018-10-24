@@ -1,18 +1,13 @@
-
-
-(function (exports) {
-
-
+(function(exports) {
     exports.app = new Vue({
-
         // the root element that will be compiled
-        el: '#skill-farming-app',
+        el: "#skill-farming-app",
 
         // app initial state
         data: {
             defaults: {
                 spPerHour: 2700,
-                characterCount: 1,
+                characterCount: 1
             },
             characterModels: [
                 // Structure of example characterModel:
@@ -23,52 +18,55 @@
             ],
             skillLevels: {
                 accounting: 4,
-                brokerRelations: 4,
+                brokerRelations: 4
             },
             prices: {
                 lastEveCentralPollTime: 0,
-                pollingInterval: 1800000,  // minimum milliseconds that must elapse between polls (30 min)
+                pollingInterval: 1800000, // minimum milliseconds that must elapse between polls (30 min)
                 plexBuy: 0,
                 extractorBuy: 0,
                 injectorBuy: 0,
-                injectorSell: 0,
+                injectorSell: 0
             },
             skills: {
                 accounting: {
                     base: 0.02,
-                    change: 0.002, // flat
+                    change: 0.002 // flat
                 },
                 brokerRelations: {
                     base: 0.03,
-                    change: 0.001, // flat
-                },
+                    change: 0.001 // flat
+                }
             },
             id: {
                 item: {
                     plex: 29668,
                     extractor: 40519,
-                    injector: 40520,
+                    injector: 40520
                 },
                 system: {
                     jita: 30000142,
-                    perimeter: 30000144,
-                },
-            },
+                    perimeter: 30000144
+                }
+            }
         },
 
         /**
          * The statements in this function are executed once, as soon as the Vue app is finished loading.
          */
         ready: function() {
-
             // attempt to get cached prices from local storage
-            var cachedPrices = this.localFetch('prices');
+            var cachedPrices = this.localFetch("prices");
             // if cached prices were found
             if (cachedPrices) {
                 // overwrite default prices with cached ones
                 this.prices = Object.assign({}, cachedPrices);
                 // if cached prices are not fresh, get updated prices from Eve Central
-                if (Date.now() > (this.prices.lastEveCentralPollTime + this.prices.pollingInterval)) {
+                if (
+                    Date.now() >
+                    this.prices.lastEveCentralPollTime +
+                        this.prices.pollingInterval
+                ) {
                     this.getPrices();
                 }
             }
@@ -78,14 +76,14 @@
             }
 
             // import any character data from local storage into the characterModels Array
-            this.characterModels = this.localFetch('characterModels') || [];
+            this.characterModels = this.localFetch("characterModels") || [];
             // if the characterModels Array is still empty, put a single default character in it
-            if (!(this.characterModels.length)) {
+            if (!this.characterModels.length) {
                 this.addCharacterModel();
             }
 
             // attempt to get user's custom tax skill levels from local storage
-            var storedSkillLevels = this.localFetch('skillLevels');
+            var storedSkillLevels = this.localFetch("skillLevels");
             // if custom levels were found, overwrite the default levels with the custom ones
             if (storedSkillLevels) {
                 this.skillLevels = Object.assign({}, storedSkillLevels);
@@ -94,32 +92,30 @@
 
         // watchers (when any of these structures change, run their handler functions)
         watch: {
-
             characterModels: {
                 deep: true,
                 handler: function(val, oldVal) {
-                    this.localStore('characterModels', val);
-                },
+                    this.localStore("characterModels", val);
+                }
             },
 
             skillLevels: {
                 deep: true,
                 handler: function(val, oldVal) {
-                    this.localStore('skillLevels', val);
-                },
+                    this.localStore("skillLevels", val);
+                }
             },
 
             prices: {
                 deep: true,
                 handler: function(val, oldVal) {
-                    this.localStore('prices', val);
+                    this.localStore("prices", val);
                 }
             }
         },
 
         // computed properties
         computed: {
-
             characterModelsRepr: function() {
                 return JSON.stringify(this.characterModels);
             },
@@ -128,14 +124,22 @@
              * @returns {Float} Transaction fee rate based on level of Accounting
              */
             transactionRate: function() {
-                return this.skills.accounting.base - (parseInt(this.skillLevels.accounting) * this.skills.accounting.change);
+                return (
+                    this.skills.accounting.base -
+                    parseInt(this.skillLevels.accounting) *
+                        this.skills.accounting.change
+                );
             },
-            
+
             /**
              * @returns {Float} Broker's fee rate based on level of Broker Relations
              */
             brokerRate: function() {
-                return this.skills.brokerRelations.base - (parseInt(this.skillLevels.brokerRelations) * this.skills.brokerRelations.change);
+                return (
+                    this.skills.brokerRelations.base -
+                    parseInt(this.skillLevels.brokerRelations) *
+                        this.skills.brokerRelations.change
+                );
             },
 
             /**
@@ -144,7 +148,9 @@
             spPerHour: function() {
                 var totalSpPerHour = 0;
                 for (var characterModel of this.characterModels) {
-                    totalSpPerHour += (parseInt(characterModel.spPerHour) * parseInt(characterModel.characterCount));
+                    totalSpPerHour +=
+                        parseInt(characterModel.spPerHour) *
+                        parseInt(characterModel.characterCount);
                 }
                 return totalSpPerHour;
             },
@@ -185,21 +191,30 @@
              * @returns {Float} Monthly cost of PLEXes based on taxes and number of characterModels
              */
             taxedPlexBuy: function() {
-                return this.taxedBuyOrderPrice(this.prices.plexBuy) * this.numberCharacters;
+                return (
+                    this.taxedBuyOrderPrice(this.prices.plexBuy) *
+                    this.numberCharacters
+                );
             },
 
             /**
              * @returns {Float} Monthly cost of extractors based on taxes, number of characterModels, and sp/month
              */
             taxedExtractorBuy: function() {
-                return this.taxedBuyOrderPrice(this.prices.extractorBuy) * this.extractorsPerMonth;
+                return (
+                    this.taxedBuyOrderPrice(this.prices.extractorBuy) *
+                    this.extractorsPerMonth
+                );
             },
 
             /**
              * @returns {Float} Monthly revenue of injectors based on taxes, number of characterModels, and sp/month
              */
             taxedInjectorSell: function() {
-                return this.taxedSellOrderPrice(this.prices.injectorSell) * this.injectorsPerMonth;
+                return (
+                    this.taxedSellOrderPrice(this.prices.injectorSell) *
+                    this.injectorsPerMonth
+                );
             },
 
             /**
@@ -236,13 +251,11 @@
                     total += this.startCostSub(characterModel);
                 }
                 return total;
-            },
-
+            }
         },
 
         // methods that implement data logic
         methods: {
-
             /**
              * @param {String} key Key of data to be stored in localStorage
              * @param {Object} value Data to be stored in localStorage
@@ -273,7 +286,7 @@
                 // create a new character from the default settings
                 var newCharacterModel = {
                     spPerHour: this.defaults.spPerHour,
-                    characterCount: this.defaults.characterCount,
+                    characterCount: this.defaults.characterCount
                 };
 
                 // add the new characterModel to the Array of characterModels
@@ -291,56 +304,69 @@
              * Polls Eve Central for updated plex, extractor and injector prices
              */
             getPrices: function() {
+                var url =
+                    `https://api.eve-central.com/api/marketstat?` +
+                    `typeid=${this.id.item.plex}&` +
+                    `typeid=${this.id.item.extractor}&` +
+                    `typeid=${this.id.item.injector}&` +
+                    `usesystem=${this.id.system.jita}`;
 
-                var url = `https://api.eve-central.com/api/marketstat?` +
-                            `typeid=${    this.id.item.plex      }&` +
-                            `typeid=${    this.id.item.extractor }&` +
-                            `typeid=${    this.id.item.injector  }&` +
-                            `usesystem=${ this.id.system.jita    }`;
+                this.$http.get(url).then(
+                    response => {
+                        // success
+                        // console.log('successful eve central call');
 
-                this.$http.get(url).then((response) => {
-                    // success
-                    // console.log('successful eve central call');
+                        // set up a parser to extract data from the returned string-formatted XML
+                        var parser = new DOMParser();
+                        var doc = parser.parseFromString(
+                            response.text(),
+                            "application/xml"
+                        );
 
-                    // set up a parser to extract data from the returned string-formatted XML
-                    var parser = new DOMParser();
-                    var doc = parser.parseFromString(response.text(), 'application/xml');
+                        // extract the plex price
+                        this.prices.plexBuy = parseFloat(
+                            doc
+                                .getElementById(this.id.item.plex)
+                                .getElementsByTagName("buy")[0]
+                                .getElementsByTagName("max")[0].childNodes[0]
+                                .nodeValue
+                        );
 
-                    // extract the plex price
-                    this.prices.plexBuy = parseFloat(doc.getElementById(this.id.item.plex)
-                                                        .getElementsByTagName('buy')[0]
-                                                        .getElementsByTagName('max')[0]
-                                                        .childNodes[0]
-                                                        .nodeValue);
+                        // extract the skill extractor price
+                        this.prices.extractorBuy = parseFloat(
+                            doc
+                                .getElementById(this.id.item.extractor)
+                                .getElementsByTagName("buy")[0]
+                                .getElementsByTagName("max")[0].childNodes[0]
+                                .nodeValue
+                        );
 
-                    // extract the skill extractor price
-                    this.prices.extractorBuy = parseFloat(doc.getElementById(this.id.item.extractor)
-                                                             .getElementsByTagName('buy')[0]
-                                                             .getElementsByTagName('max')[0]
-                                                             .childNodes[0]
-                                                             .nodeValue);
+                        // extract the skill injector price (buy)
+                        this.prices.injectorBuy = parseFloat(
+                            doc
+                                .getElementById(this.id.item.injector)
+                                .getElementsByTagName("buy")[0]
+                                .getElementsByTagName("max")[0].childNodes[0]
+                                .nodeValue
+                        );
 
-                    // extract the skill injector price (buy)
-                    this.prices.injectorBuy = parseFloat(doc.getElementById(this.id.item.injector)
-                                                            .getElementsByTagName('buy')[0]
-                                                            .getElementsByTagName('max')[0]
-                                                            .childNodes[0]
-                                                            .nodeValue);
+                        // extract the skill injector price (sell)
+                        this.prices.injectorSell = parseFloat(
+                            doc
+                                .getElementById(this.id.item.injector)
+                                .getElementsByTagName("sell")[0]
+                                .getElementsByTagName("min")[0].childNodes[0]
+                                .nodeValue
+                        );
 
-                    // extract the skill injector price (sell)
-                    this.prices.injectorSell = parseFloat(doc.getElementById(this.id.item.injector)
-                                                            .getElementsByTagName('sell')[0]
-                                                            .getElementsByTagName('min')[0]
-                                                            .childNodes[0]
-                                                            .nodeValue);
-
-                    // update the polling timestamp
-                    this.prices.lastEveCentralPollTime = Date.now();
-                }, (response) => {
-                    // failure
-                    // console.log('failed eve central call');
-                });
-
+                        // update the polling timestamp
+                        this.prices.lastEveCentralPollTime = Date.now();
+                    },
+                    response => {
+                        // failure
+                        // console.log('failed eve central call');
+                    }
+                );
             },
 
             /**
@@ -348,7 +374,7 @@
              * @returns {Float} Sum of the buy order's raw price and broker fee
              */
             taxedBuyOrderPrice: function(principal) {
-                return principal + (principal * this.brokerRate);
+                return principal + principal * this.brokerRate;
             },
 
             /**
@@ -356,7 +382,11 @@
              * @returns {Float} Sum of the sell order's raw price, broker fee and sales tax
              */
             taxedSellOrderPrice: function(principal) {
-                return principal - (principal * this.brokerRate) - (principal * this.transactionRate);
+                return (
+                    principal -
+                    principal * this.brokerRate -
+                    principal * this.transactionRate
+                );
             },
 
             /**
@@ -364,7 +394,9 @@
              * returns {Float} Cost of injectors needed to start this character model from scratch
              */
             startCostInject: function(characterModel) {
-                return this.prices.injectorBuy * 11 * characterModel.characterCount;
+                return (
+                    this.prices.injectorBuy * 11 * characterModel.characterCount
+                );
             },
 
             /**
@@ -372,7 +404,11 @@
              * returns {Float} Cost of plex needed to start this character model from scratch given its sp/hr
              */
             startCostSub: function(characterModel) {
-                return this.prices.plexBuy * (this.startTimeSub(characterModel) / 30) * characterModel.characterCount;
+                return (
+                    this.prices.plexBuy *
+                    (this.startTimeSub(characterModel) / 30) *
+                    characterModel.characterCount
+                );
             },
 
             /**
@@ -383,10 +419,7 @@
                 var spPerDay = characterModel.spPerHour * 24;
                 var daysNeeded = 5500000 / spPerDay;
                 return daysNeeded;
-            },
-
-        },
-
+            }
+        }
     }); // end of app definition
-
 })(window);
