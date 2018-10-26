@@ -21,7 +21,7 @@
                 brokerRelations: 4
             },
             prices: {
-                lastEveCentralPollTime: 0,
+                lastEvepraisalPollTime: 0,
                 pollingInterval: 1800000, // minimum milliseconds that must elapse between polls (30 min)
                 plexBuy: 0,
                 extractorBuy: 0,
@@ -40,7 +40,8 @@
             },
             id: {
                 item: {
-                    plex: 29668,
+                    oldplex: 29668,
+                    plex: 44992,
                     extractor: 40519,
                     injector: 40520
                 },
@@ -61,18 +62,18 @@
             if (cachedPrices) {
                 // overwrite default prices with cached ones
                 this.prices = Object.assign({}, cachedPrices);
-                // if cached prices are not fresh, get updated prices from Eve Central
+                // if cached prices are not fresh, update prices using Evepraisal
                 if (
                     Date.now() >
-                    this.prices.lastEveCentralPollTime +
+                    this.prices.lastEvepraisalPollTime +
                         this.prices.pollingInterval
                 ) {
-                    this.getPrices();
+                    this.updateAllItemPrices();
                 }
             }
-            // else no cached prices were found, so get updated prices from Eve Central
+            // else no cached prices were found; update prices using Evepraisal
             else {
-                this.getPrices();
+                this.updateAllItemPrices();
             }
 
             // import any character data from local storage into the characterModels Array
@@ -193,6 +194,7 @@
             taxedPlexBuy: function() {
                 return (
                     this.taxedBuyOrderPrice(this.prices.plexBuy) *
+                    450 *
                     this.numberCharacters
                 );
             },
@@ -301,72 +303,65 @@
             },
 
             /**
-             * Polls Eve Central for updated plex, extractor and injector prices
+             * Update prices in local state using results of requests to
+             * Evepraisal for fresh price data.
              */
-            getPrices: function() {
-                var url =
-                    `https://api.eve-central.com/api/marketstat?` +
-                    `typeid=${this.id.item.plex}&` +
-                    `typeid=${this.id.item.extractor}&` +
-                    `typeid=${this.id.item.injector}&` +
-                    `usesystem=${this.id.system.jita}`;
-
-                this.$http.get(url).then(
-                    response => {
-                        // success
-                        // console.log('successful eve central call');
-
-                        // set up a parser to extract data from the returned string-formatted XML
-                        var parser = new DOMParser();
-                        var doc = parser.parseFromString(
-                            response.text(),
-                            "application/xml"
+            updateAllItemPrices: function() {
+                // plex price
+                this.getOneItemPrices(this.id.item.plex)
+                    .then(response => {
+                        this.prices.plexBuy =
+                            response.data.summaries[0].prices.buy.max;
+                    })
+                    .catch(error => {
+                        console.log(
+                            "Failed to get PLEX buy price from Evepraisal"
                         );
+                    });
 
-                        // extract the plex price
-                        this.prices.plexBuy = parseFloat(
-                            doc
-                                .getElementById(this.id.item.plex)
-                                .getElementsByTagName("buy")[0]
-                                .getElementsByTagName("max")[0].childNodes[0]
-                                .nodeValue
+                // skill extractor price
+                this.getOneItemPrices(this.id.item.extractor)
+                    .then(response => {
+                        this.prices.extractorBuy =
+                            response.data.summaries[0].prices.buy.max;
+                    })
+                    .catch(error => {
+                        console.log(
+                            "Failed to get Extractor buy price from Evepraisal"
                         );
+                    });
 
-                        // extract the skill extractor price
-                        this.prices.extractorBuy = parseFloat(
-                            doc
-                                .getElementById(this.id.item.extractor)
-                                .getElementsByTagName("buy")[0]
-                                .getElementsByTagName("max")[0].childNodes[0]
-                                .nodeValue
+                // large skill injector prices
+                this.getOneItemPrices(this.id.item.injector)
+                    .then(response => {
+                        this.prices.injectorBuy =
+                            response.data.summaries[0].prices.buy.max;
+                        this.prices.injectorSell =
+                            response.data.summaries[0].prices.sell.min;
+                    })
+                    .catch(error => {
+                        console.log(
+                            "Failed to get Injector buy/sell prices from Evepraisal"
                         );
+                    });
 
-                        // extract the skill injector price (buy)
-                        this.prices.injectorBuy = parseFloat(
-                            doc
-                                .getElementById(this.id.item.injector)
-                                .getElementsByTagName("buy")[0]
-                                .getElementsByTagName("max")[0].childNodes[0]
-                                .nodeValue
-                        );
+                // update the polling timestamp
+                this.prices.lastEvepraisalPollTime = Date.now();
+            },
 
-                        // extract the skill injector price (sell)
-                        this.prices.injectorSell = parseFloat(
-                            doc
-                                .getElementById(this.id.item.injector)
-                                .getElementsByTagName("sell")[0]
-                                .getElementsByTagName("min")[0].childNodes[0]
-                                .nodeValue
-                        );
-
-                        // update the polling timestamp
-                        this.prices.lastEveCentralPollTime = Date.now();
-                    },
-                    response => {
-                        // failure
-                        // console.log('failed eve central call');
-                    }
-                );
+            /**
+             * Get the prices of an item by querying Evepraisal
+             *
+             * @param {number} id ID of item to get prices of
+             */
+            getOneItemPrices(id) {
+                const proxyUrl = "http://cors-anywhere.peterhenry.net:8080/";
+                const itemUrl = `evepraisal.com/item/${id}.json`;
+                return axios.get(`${proxyUrl}${itemUrl}`, {
+                    // headers: {
+                    //     "User-Agent": "mosbasik.github.io/skillfarming"
+                    // }
+                });
             },
 
             /**

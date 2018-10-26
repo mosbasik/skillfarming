@@ -1,136 +1,142 @@
 <!DOCTYPE html>
 <html>
-  <head>
 
+<head>
   <meta charset="utf-8" />
 
   <title>Skill Farming</title>
-    <!-- <link rel="stylesheet" type="text/css" href="static/css/bootstrap.min.css"> -->
-    <link rel="stylesheet" type="text/css" href="bootstrap/css/bootstrap.min.css">
-    <link rel="stylesheet" type="text/css" href="bootflat/css/bootflat.min.css">
-    <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Ubuntu:400,700|Josefin+Sans:700">
 
-    <!-- <link rel="stylesheet" type="text/css" href="object-fit-0.4.1/dist/polyfill.object-fit.css"> -->
-    <link rel="stylesheet" type="text/css" href="skillfarming.css">
+  <!-- <link rel="stylesheet" type="text/css" href="static/css/bootstrap.min.css"> -->
+  <link rel="stylesheet" type="text/css" href="bootstrap/css/bootstrap.min.css">
+  <link rel="stylesheet" type="text/css" href="bootflat/css/bootflat.min.css">
+  <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Ubuntu:400,700|Josefin+Sans:700">
 
-  </head>
+  <!-- <link rel="stylesheet" type="text/css" href="object-fit-0.4.1/dist/polyfill.object-fit.css"> -->
+  <link rel="stylesheet" type="text/css" href="skillfarming.css">
 
-  <body id="skill-farming-app" class="container">
+</head>
 
-    <h1>Skill Farming</h1>
+<body id="skill-farming-app" class="container">
 
-    <div class="row">
-      <div class="col-lg-6">
-        <h2>Monthly Profit:</h2>
-      </div>
-      <div class="col-lg-6">
-        <h2><span class="pull-right">{{ totalRevenue - totalCost | currency '' 2 }}</span></h2>
-      </div>
+  <h1>Skill Farming</h1>
+
+  <div class="row">
+    <div class="col-lg-6">
+      <h2>Monthly Profit:</h2>
     </div>
+    <div class="col-lg-6">
+      <h2><span class="pull-right">{{ totalRevenue - totalCost | currency '' 2 }}</span></h2>
+    </div>
+  </div>
 
-    <h2>Character Models</h2>
+  <h2>Character Models</h2>
 
-    <table class="table">
-      <thead>
-        <tr>
-          <th></th>
-          <th>SP/Hour</th>
-          <th># Characters</th>
-          <th>Start Time (Sub)</th>
-          <th class="isk-header">Start Cost (Sub)</th>
-          <th class="isk-header">Start Cost (Inject)</th>
-          <th class="text-center">Remove</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr v-for="characterModel of characterModels">
-          <th>Character Model {{ $index + 1 }}</th>
-          <td><input type="number" class="form-control" v-model="characterModels[$index].spPerHour"></td>
-          <td><input type="number" class="form-control" v-model="characterModels[$index].characterCount"></td>
-          <td>{{ startTimeSub(characterModels[$index]) | currency '' 1 }} days</td>
-          <td class="isk">{{ startCostSub(characterModels[$index]) | currency '' 2}}</td>
-          <td class="isk">{{ startCostInject(characterModels[$index]) | currency '' 2}}</td>
-          <td><div class="text-center"><button class="btn btn-danger btn-sm" @click="removeCharacterModel(characterModel)">x</button></div></td>
-        </tr>
-      </tbody>
-      <tfoot>
-        <tr>
-          <th>Totals:</th>
-          <th>{{ spPerHour }}</th>
-          <th>{{ numberCharacters }}</th>
-          <th></th>
-          <th class="isk">{{ startCostSubTotal | currency '' 2 }}</th>
-          <th class="isk">{{ startCostInjectTotal | currency '' 2 }}</th>
-          <th><div class="text-center"><button class="btn btn-default btn-sm" @click="addCharacterModel">+</button></div></th>
-        </tr>
-      </tfoot>
-    </table>
+  <table class="table">
+    <thead>
+      <tr>
+        <th></th>
+        <th>SP/Hour</th>
+        <th># Characters</th>
+        <th>Start Time (Sub)</th>
+        <th class="isk-header">Start Cost (Sub)</th>
+        <th class="isk-header">Start Cost (Inject)</th>
+        <th class="text-center">Remove</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr v-for="characterModel of characterModels">
+        <th>Character Model {{ $index + 1 }}</th>
+        <td><input type="number" class="form-control" v-model="characterModels[$index].spPerHour"></td>
+        <td><input type="number" class="form-control" v-model="characterModels[$index].characterCount"></td>
+        <td>{{ startTimeSub(characterModels[$index]) | currency '' 1 }} days</td>
+        <td class="isk">{{ startCostSub(characterModels[$index]) | currency '' 2}}</td>
+        <td class="isk">{{ startCostInject(characterModels[$index]) | currency '' 2}}</td>
+        <td>
+          <div class="text-center"><button class="btn btn-danger btn-sm" @click="removeCharacterModel(characterModel)">x</button></div>
+        </td>
+      </tr>
+    </tbody>
+    <tfoot>
+      <tr>
+        <th>Totals:</th>
+        <th>{{ spPerHour }}</th>
+        <th>{{ numberCharacters }}</th>
+        <th></th>
+        <th class="isk">{{ startCostSubTotal | currency '' 2 }}</th>
+        <th class="isk">{{ startCostInjectTotal | currency '' 2 }}</th>
+        <th>
+          <div class="text-center"><button class="btn btn-default btn-sm" @click="addCharacterModel">+</button></div>
+        </th>
+      </tr>
+    </tfoot>
+  </table>
 
-    <h2>Monthly Cost</h2>
-    <table class="table">
-      <thead>
-        <tr>
-          <th></th>
-          <th class="isk-header">Base Cost</th>
-          <th class="isk-header">Monthly Multiplier</th>
-          <th class="isk-header">Total Cost (after tax)</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr>
-          <th>Plex Buy</th>
-          <td class="isk">{{ prices.plexBuy | currency '' 2 }}</td>
-          <td class="isk">{{ numberCharacters }}</td>
-          <td class="isk">{{ taxedPlexBuy | currency '' 2 }}</td>
-        </tr>
-        <tr>
-          <th>Extractor Buy</th>
-          <td class="isk">{{ prices.extractorBuy | currency '' 2 }}</td>
-          <td class="isk">{{ extractorsPerMonth }}</td>
-          <td class="isk">{{ taxedExtractorBuy | currency '' 2 }}</td>
-        </tr>
-      </tbody>
-      <tfoot>
-        <tr>
-          <th></th>
-          <th></th>
-          <th></th>
-          <th class="isk">{{ totalCost | currency '' 2}}</th>
-        </tr>
-      </tfoot>
-    </table>
-
-    <h2>Monthly Revenue</h2>
-    <table class="table">
-      <thead>
-        <tr>
-          <th></th>
-          <th class="isk-header">Base Revenue</th>
-          <th class="isk-header">Monthly Multiplier</th>
-          <th class="isk-header">Total Revenue (after tax)</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr>
-          <th>Injector Sell</th>
-          <td class="isk">{{ prices.injectorSell | currency '' 2 }}</td>
-          <td class="isk">{{ injectorsPerMonth }}</td>
-          <td class="isk">{{ taxedInjectorSell | currency '' 2 }}</td>
-        </tr>
-      </tbody>
-      <tfoot>
+  <h2>Monthly Cost</h2>
+  <table class="table">
+    <thead>
+      <tr>
+        <th></th>
+        <th class="isk-header">Base Cost</th>
+        <th class="isk-header">Monthly Multiplier</th>
+        <th class="isk-header">Total Cost (after tax)</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <th>Plex Buy</th>
+        <td class="isk">{{ prices.plexBuy | currency '' 2 }}</td>
+        <td class="isk">{{ numberCharacters * 450 }}</td>
+        <td class="isk">{{ taxedPlexBuy | currency '' 2 }}</td>
+      </tr>
+      <tr>
+        <th>Extractor Buy</th>
+        <td class="isk">{{ prices.extractorBuy | currency '' 2 }}</td>
+        <td class="isk">{{ extractorsPerMonth }}</td>
+        <td class="isk">{{ taxedExtractorBuy | currency '' 2 }}</td>
+      </tr>
+    </tbody>
+    <tfoot>
+      <tr>
         <th></th>
         <th></th>
         <th></th>
-        <th class="isk">{{ totalRevenue | currency '' 2 }}</th>
-      </tfoot>
-    </table>
+        <th class="isk">{{ totalCost | currency '' 2}}</th>
+      </tr>
+    </tfoot>
+  </table>
 
-    <script type="text/javascript" src="bootstrap/js/jquery-1.11.3.min.js"></script>
-    <script type="text/javascript" src="bootstrap/js/bootstrap.min.js"></script>
-    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/vue/1.0.26/vue.min.js"></script>
-    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/vue-resource/0.9.3/vue-resource.min.js"></script>
-    <script type="text/javascript" src="skillfarming.js"></script>
+  <h2>Monthly Revenue</h2>
+  <table class="table">
+    <thead>
+      <tr>
+        <th></th>
+        <th class="isk-header">Base Revenue</th>
+        <th class="isk-header">Monthly Multiplier</th>
+        <th class="isk-header">Total Revenue (after tax)</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <th>Injector Sell</th>
+        <td class="isk">{{ prices.injectorSell | currency '' 2 }}</td>
+        <td class="isk">{{ injectorsPerMonth }}</td>
+        <td class="isk">{{ taxedInjectorSell | currency '' 2 }}</td>
+      </tr>
+    </tbody>
+    <tfoot>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th class="isk">{{ totalRevenue | currency '' 2 }}</th>
+    </tfoot>
+  </table>
 
-  </body>
+  <script type="text/javascript" src="bootstrap/js/jquery-1.11.3.min.js"></script>
+  <script type="text/javascript" src="bootstrap/js/bootstrap.min.js"></script>
+  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/vue/1.0.26/vue.js"></script>
+  <script type="text/javascript" src="https://unpkg.com/axios@0.18.0/dist/axios.min.js"></script>
+  <script type="text/javascript" src="skillfarming.js"></script>
+
+</body>
+
 </html>
