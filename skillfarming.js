@@ -355,8 +355,8 @@
              * @param {number} id ID of item to get prices of
              */
             getOneItemPrices(id) {
-                const proxyUrl = "http://cors-anywhere.peterhenry.net:8080/";
-                const itemUrl = `evepraisal.com/item/${id}.json`;
+                const proxyUrl = "https://cors-anywhere.peterhenry.net/";
+                const itemUrl = `https://evepraisal.com/item/${id}.json`;
                 return axios.get(`${proxyUrl}${itemUrl}`, {
                     // headers: {
                     //     "User-Agent": "mosbasik.github.io/skillfarming"
